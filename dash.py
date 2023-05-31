@@ -25,7 +25,7 @@ st.write("""
 
 df = pd.read_csv('df_all.csv',index_col='SK_ID_CURR')
 X = df.drop(columns=['TARGET'])
-feature_names = X.columns
+feature_names2 = X.columns
 
 # Pickle
 with open("models/classifier.pkl","rb") as pickle_in:
@@ -34,7 +34,7 @@ with open("models/classifier.pkl","rb") as pickle_in:
 #print(X)  # Check
 
 
-explainer = shap.TreeExplainer(classifier, X)
+explainer = shap.TreeExplainer(classifier, X, feature_names=feature_names2)
 #explainer = shap.TreeExplainer(classifier)
 shap.initjs()
 
