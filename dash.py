@@ -34,17 +34,10 @@ with open("models/classifier.pkl","rb") as pickle_in:
 #print(X)  # Check
 
 
-#explainer = shap.TreeExplainer(classifier, X, feature_names=feature_names)
+explainer = shap.TreeExplainer(classifier, X)
 #explainer = shap.TreeExplainer(classifier)
-#shap.initjs()
-
-explainer_args = {
-    'model': classifier,
-    'data': X,
-    'feature_names': feature_names
-}
-explainer = shap.TreeExplainer(**explainer_args)
 shap.initjs()
+
     
 # explain model prediction shap results
 def explain_model_prediction_shap(df_all):
