@@ -34,17 +34,17 @@ with open("models/classifier.pkl","rb") as pickle_in:
 #print(X)  # Check
 
 
-explainer = shap.TreeExplainer(classifier, X, feature_names=feature_names)
+#explainer = shap.TreeExplainer(classifier, X, feature_names=feature_names)
 #explainer = shap.TreeExplainer(classifier)
 shap.initjs()
 
     
 # explain model prediction shap results
-def explain_model_prediction_shap(df_all):
+#def explain_model_prediction_shap(df_all):
     # Calculate Shap values
-    shap_values = explainer(np.array(df_all))
-    p = shap.plots.bar(shap_values)
-    return p, shap_values 
+#    shap_values = explainer(np.array(df_all))
+#    p = shap.plots.bar(shap_values)
+#    return p, shap_values 
 
 def bivariate_analysis(feat1, feat_2, df_all):
     st.subheader('Bivariate Analysis')
@@ -181,17 +181,13 @@ def process():
             gauge = plot_gauge(prob, 0.3918)  
             st.plotly_chart(gauge)
             
-            st.subheader('Result Interpretability - Applicant Level')
-            p, shap_values = explain_model_prediction_shap(df_all) 
-            st.pyplot(p)
+            #st.subheader('Result Interpretability - Applicant Level')
+            #p, shap_values = explain_model_prediction_shap(df_all) 
+            #st.pyplot(p)
 
-            st.subheader('Model Interpretability - Overall') 
-            #shap_values_ttl = explainer(X) 
-            #fig_ttl = shap.plots.bar(shap_values_ttl, max_display=10)
-            #st.pyplot(fig_ttl)
-            #st.pyplot(shap.summary_plot(shap.TreeExplainer(classifier).shap_values((X)), X, plot_type="bar"))
-            shap_image = Image.open(r'globalshap.png')
-            st.image(shap_image)
+            #st.subheader('Model Interpretability - Overall') 
+            #shap_image = Image.open(r'globalshap.png')
+            #st.image(shap_image)
             
             
     if st.sidebar.button('display'):
