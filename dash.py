@@ -25,7 +25,7 @@ st.write("""
 
 df = pd.read_csv('df_all.csv',index_col='SK_ID_CURR')
 X = df.drop(columns=['TARGET'])
-feature_names = X.columns
+#feature_names = X.columns
 
 # Pickle
 with open("models/classifier.pkl","rb") as pickle_in:
