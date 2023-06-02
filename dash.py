@@ -12,6 +12,8 @@ import seaborn as sns
 from sklearn.neighbors import NearestNeighbors
 from PIL import Image
 
+# Définir le backend de Matplotlib pour Streamlit
+st.set_option('deprecation.showPyplotGlobalUse', False)
 plt.switch_backend('Agg')
 
 st.set_page_config(
@@ -31,18 +33,15 @@ feature_names = X.columns
 with open("models/classifier.pkl","rb") as pickle_in:
     classifier = pickle.load(pickle_in)
 
-#print(X)  # Check
-
 
 explainer = shap.TreeExplainer(classifier, X, feature_names=feature_names)
-#explainer = shap.TreeExplainer(classifier)
 shap.initjs()
 
     
 # explain model prediction shap results
-def explain_model_prediction_shap(df_all):
+def explain_model_prediction_shap(df):
     # Calculate Shap values
-    shap_values = explainer(np.array(df_all))
+    shap_values = explainer(np.array(df))
     p = shap.plots.bar(shap_values)
     return p, shap_values 
 
@@ -95,26 +94,35 @@ def best_classification(probas, threshold, X):
     y_pred = 1 if probas > threshold else 0 
     return y_pred
 
-# Définition de la fonction pour afficher les informations du client
 def display_client_info(client_data, customer, df):
-    st.subheader(f"Data for client {customer}")
-    
-    # Calcul des statistiques globales pour chaque variable
-    statistics = df.describe().transpose()
-    
+
+    # Calcul des statistiques globales pour chaque variable en fonction de la valeur de 'TARGET'
+    target_value = client_data['TARGET'].values[0]
+    if target_value == 0:
+        statistics = df[df['TARGET'] == 0].describe().transpose()
+    else:
+        statistics = df[df['TARGET'] == 1].describe().transpose()
+
     # Convertir les informations du client en DataFrame
     client_data_df = pd.DataFrame(client_data).transpose()
+    client_data_df.columns = client_data_df.columns.astype(str)
     
     # Ajouter les informations du client en tant que colonne dans le tableau des statistiques globales
-    statistics_with_client = pd.concat([statistics, client_data_df], axis=1)
+    statistics_with_client = pd.concat([client_data_df, statistics], axis=1)
+    #statistics_with_client.index.astype(str)
+
+    # Affichage des statistiques globales avec les informations du client
+    st.subheader(f"Group Stats - TARGET {client_data['TARGET'].values[0]}")
+    st.write(statistics_with_client)
+
     
-    with st.expander("See data", expanded=False):
-        # Affichage des informations du client
-        st.write(client_data)
+# Définition de la fonction pour afficher les informations du client
+def client_info(client_data):
+    st.subheader(f"Client Data")
+    
+    # Affichage des informations du client
+    st.write(client_data)
         
-        # Affichage des statistiques globales avec les informations du client
-        st.subheader("Global Statistics")
-        st.write(statistics_with_client)
 
 def display_boxplots(dataframe, selected_id):
     st.header('100 Nearest clients')
@@ -176,38 +184,50 @@ def process():
             #st.sidebar.success(risk_assessment)
             st.sidebar.markdown(f'<p style="color:{risk_color}">{risk_assessment}</p>', unsafe_allow_html=True)
             st.sidebar.write("Probability: ", round(float(prob),4))
-            st.sidebar.write(" best threshold: ", 0.3918)      
+            st.sidebar.write(" best threshold: ", 0.3918) 
             st.subheader('Probability Gauge')
             gauge = plot_gauge(prob, 0.3918)  
             st.plotly_chart(gauge)
             
-            st.subheader('Result Interpretability - Applicant Level')
-            p, shap_values = explain_model_prediction_shap(df_all) 
-            st.pyplot(p)
-
-            st.subheader('Model Interpretability - Overall') 
-            #shap_values_ttl = explainer(X) 
-            #fig_ttl = shap.plots.bar(shap_values_ttl, max_display=10)
-            #st.pyplot(fig_ttl)
-            #st.pyplot(shap.summary_plot(shap.TreeExplainer(classifier).shap_values((X)), X, plot_type="bar"))
-            shap_image = Image.open(r'globalshap.png')
-            st.image(shap_image)
+            # Récupération des informations du client sélectionné
+            client_data = df[df.index == Customer]
+            client_info(client_data) 
             
-            
-    if st.sidebar.button('display'):
-        # Affichage des boxplots
-        display_relative_situation(df)
-        
+    if st.sidebar.checkbox("Client Data"):
+        # Récupération des informations du client sélectionné
+        client_data = df[df.index == Customer]
+        client_info(client_data)     
+           
     # Affichage des informations du client sélectionné
-    if st.button("Info"):
+    if st.sidebar.checkbox("Group Stats"):
         # Récupération des informations du client sélectionné
         client_data = df[df.index == Customer]
         # Appel de la fonction pour afficher les informations
         display_client_info(client_data, Customer, df)
+        
+    if st.sidebar.checkbox("Feature Importance"):
+        st.subheader('Result Interpretability - Applicant Level')
+        df_all = get_value(Customer)
+        p, shap_values = explain_model_prediction_shap(df_all) 
+        st.pyplot(p)
 
+        st.subheader('Model Interpretability - Overall') 
+        #shap_values_ttl = explainer(X) 
+        #fig_ttl = shap.plots.bar(shap_values_ttl, max_display=10)
+        #st.pyplot(fig_ttl)
+        #st.pyplot(shap.summary_plot(shap.TreeExplainer(classifier).shap_values((X)), X, plot_type="bar"))
+        shap_image = Image.open(r'globalshap.png')
+        st.image(shap_image)
+               
+    if st.sidebar.button('display'):
+        # Affichage des boxplots
+        display_relative_situation(df)
+        
     if st.sidebar.checkbox("100 Nearest clients", key=20):
         #st.sidebar.header("100 Nearest clients")
         display_boxplots(df, Customer)
+        
+
 
             
 def display_relative_situation(df_all):
