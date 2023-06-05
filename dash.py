@@ -47,8 +47,8 @@ def explain_model_prediction_shap(df):
 
 def bivariate_analysis(feat1, feat_2, df_all):
     st.subheader('Bivariate Analysis')
-    p = sns.scatterplot(df_all=df_all, x=df_all[feat1], y=df_all[feat_2], hue='TARGET',
-                             color='red', s=100)
+    p = sns.scatterplot(data=df_all, x=df_all[feat1], y=df_all[feat_2], hue='TARGET',
+                             color='red', s=5)
     return p
  
 def plot_gauge(current_value, threshold):
@@ -62,11 +62,18 @@ def plot_gauge(current_value, threshold):
             }))
     return fig
     
-# get the data of the selected customer
 def get_value(index):
     # Select the row at the specified index
     value = X.loc[index]
+    # Convert the row values to a DataFrame with appropriate column names
+    value_df = pd.DataFrame([value.values], columns=value.index)
+    return value_df
+
+def get_value_shap(index):
+    # Select the row at the specified index
+    value = X.loc[index]
     return value.values.tolist()
+
   
 #def request_prediction(URI, df_all):
     
@@ -158,94 +165,121 @@ def display_boxplots(dataframe, selected_id):
 
 
 def process():
-         
     st.title("Loan Default Prediction")
     html_temp = """
-    <div style="background-color:tomato;padding:10px">
+    <div style="background-color:steelblue;padding:10px">
     <h2 style="color:white;text-align:center;">loan payment risk prediction ML App </h2>
     </div>
     """
-    st.markdown(html_temp,unsafe_allow_html=True)
-    
-    Customer = st.sidebar.selectbox("Select client number: ",X.index)
-    
+    st.markdown(html_temp, unsafe_allow_html=True)
+
+    Customer = st.sidebar.selectbox("Select client number: ", X.index)
+
+    # Récupération des informations du client sélectionné
+    client_data = df[df.index == Customer]
+    df_all = get_value(Customer)
+    df_all_shap = get_value_shap(Customer)
+
     if st.sidebar.button("Predict"):
-            df_all = get_value(Customer)
-            result = request_prediction(df_all, classifier)
-            score = result['prediction']
-            prob = result['probability']
-            y_pred = best_classification(prob, 0.3918, df_all)
-            if (y_pred == 1):
-                risk_assessment = "Loan denied"
-                risk_color = "red"
-            else:
-                risk_assessment = "Loan accepted"
-                risk_color = "green"
-            #st.sidebar.success(risk_assessment)
-            st.sidebar.markdown(f'<p style="color:{risk_color}">{risk_assessment}</p>', unsafe_allow_html=True)
-            st.sidebar.write("Probability: ", round(float(prob),4))
-            st.sidebar.write(" best threshold: ", 0.3918) 
-            st.subheader('Probability Gauge')
-            gauge = plot_gauge(prob, 0.3918)  
-            st.plotly_chart(gauge)
-            
-            # Récupération des informations du client sélectionné
-            client_data = df[df.index == Customer]
-            client_info(client_data) 
-            
+        result = request_prediction(df_all, classifier)
+        score = result['prediction']
+        prob = result['probability']
+        y_pred = best_classification(prob, 0.3918, df_all)
+        if y_pred == 1:
+            risk_assessment = "Loan denied"
+            risk_color = "red"
+        else:
+            risk_assessment = "Loan accepted"
+            risk_color = "green"
+
+        st.sidebar.markdown(f'<p style="color:{risk_color}">{risk_assessment}</p>', unsafe_allow_html=True)
+        st.sidebar.write("Probability: ", round(float(prob), 4))
+        st.sidebar.write("Best threshold: ", 0.3918)
+        st.subheader('Probability Gauge')
+        gauge = plot_gauge(prob, 0.3918)
+        st.plotly_chart(gauge)
+
     if st.sidebar.checkbox("Client Data"):
         # Récupération des informations du client sélectionné
         client_data = df[df.index == Customer]
-        client_info(client_data)     
-           
+        client_info(client_data)
+
     # Affichage des informations du client sélectionné
     if st.sidebar.checkbox("Group Stats"):
         # Récupération des informations du client sélectionné
         client_data = df[df.index == Customer]
         # Appel de la fonction pour afficher les informations
         display_client_info(client_data, Customer, df)
-        
+
+        # st.sidebar.header("100 Nearest clients")
+        display_boxplots(df, Customer)
+
     if st.sidebar.checkbox("Feature Importance"):
         st.subheader('Result Interpretability - Applicant Level')
-        df_all = get_value(Customer)
-        p, shap_values = explain_model_prediction_shap(df_all) 
+        df_all_shap = get_value_shap(Customer)
+        p, shap_values = explain_model_prediction_shap(df_all_shap)
         st.pyplot(p)
 
-        st.subheader('Model Interpretability - Overall') 
-        #shap_values_ttl = explainer(X) 
-        #fig_ttl = shap.plots.bar(shap_values_ttl, max_display=10)
-        #st.pyplot(fig_ttl)
-        #st.pyplot(shap.summary_plot(shap.TreeExplainer(classifier).shap_values((X)), X, plot_type="bar"))
+        st.subheader('Model Interpretability - Overall')
+        # shap_values_ttl = explainer(X)
+        # fig_ttl = shap.plots.bar(shap_values_ttl, max_display=10)
+        # st.pyplot(fig_ttl)
+        # st.pyplot(shap.summary_plot(shap.TreeExplainer(classifier).shap_values((X)), X, plot_type="bar"))
         shap_image = Image.open(r'globalshap.png')
         st.image(shap_image)
-               
-    if st.sidebar.button('display'):
-        # Affichage des boxplots
-        display_relative_situation(df)
+
+
+    if st.sidebar.checkbox("Edit Client Data"):
+        st.subheader("Edit Client Data / Updated Probability")
+
+        # Ajouter les curseurs pour chaque variable que vous souhaitez modifier
         
-    if st.sidebar.checkbox("100 Nearest clients", key=20):
-        #st.sidebar.header("100 Nearest clients")
-        display_boxplots(df, Customer)
+        EXT_SOURCE_3 = st.sidebar.slider("EXT_SOURCE_3", min_value=0.0, max_value=0.9, value=float(client_data['EXT_SOURCE_3'].values[0]))
+        EXT_SOURCE_2 = st.sidebar.slider("EXT_SOURCE_2", min_value=0.0, max_value=1.0, value=float(client_data['EXT_SOURCE_2'].values[0]))
+        PAYMENT_RATE = st.sidebar.slider("PAYMENT_RATE", min_value=0.02, max_value=0.13, value=float(client_data['PAYMENT_RATE'].values[0]), step=0.005)
+        DAYS_EMPLOYED = st.sidebar.slider("DAYS_EMPLOYED", min_value=-2000.0, max_value=0.0, value=float(client_data['DAYS_EMPLOYED'].values[0]))
+        AMT_ANNUITY = st.sidebar.slider("AMT_ANNUITY", min_value=20000.0, max_value=30000.0, value=float(client_data['AMT_ANNUITY'].values[0]))
+
+
+        # Mettre à jour les valeurs du client sélectionné avec les nouvelles valeurs
+        df_all['PAYMENT_RATE'] = PAYMENT_RATE
+        df_all['EXT_SOURCE_3'] = EXT_SOURCE_3
+        df_all['EXT_SOURCE_2'] = EXT_SOURCE_2
+        df_all['DAYS_EMPLOYED'] = DAYS_EMPLOYED
+        df_all['AMT_ANNUITY'] = AMT_ANNUITY
         
+        # Mettre à jour d'autres variables en fonction des curseurs
 
+        result = request_prediction(df_all, classifier)
+        score = result['prediction']
+        prob = result['probability']
+        y_pred = best_classification(prob, 0.3918, df_all)
+        if y_pred == 1:
+            risk_assessment = "Loan denied"
+            risk_color = "red"
+        else:
+            risk_assessment = "Loan accepted"
+            risk_color = "green"
 
-            
-def display_relative_situation(df_all):
-    st.subheader('Relative Situation - Boxplots')
-    fig, ax = plt.subplots(figsize=(16, 6))
-    sns.boxplot(data=df_all, ax=ax, showfliers=False)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
-    st.pyplot(fig)
+        st.sidebar.markdown(f'<p style="color:{risk_color}">{risk_assessment}</p>', unsafe_allow_html=True)
+        st.sidebar.write("Updated Probability: ", round(float(prob), 4))
+        st.sidebar.write("Best threshold: ", 0.3918)
+        #st.subheader('Updated Probability Gauge')
+        gauge = plot_gauge(prob, 0.3918)
+        st.plotly_chart(gauge)
 
-
-    
-    selected_feature_1 = st.sidebar.selectbox('Feature 1', feature_names)
-    selected_feature_2 = st.sidebar.selectbox('Feature 2', feature_names)
-    #if st.sidebar.button('display'):
-                #data_chart = df.groupby("TARGET")[[selected_feature_1,selected_feature_2]].value_counts().unstack(level=0)
-                #st.bar_chart(data_chart)
-                #p = bivariate_analysis(selected_feature_1, selected_feature_2, df)
-                #st.pyplot()
+    if st.sidebar.checkbox("Bivariate Analysis"):
+         
+        selected_feature_1 = st.sidebar.selectbox('Select X', feature_names)
+        selected_feature_2 = st.sidebar.selectbox('Select Y', feature_names)
+        if st.sidebar.button('display'):
+                    #data_chart = df.groupby("TARGET")[[selected_feature_1,selected_feature_2]].value_counts().unstack(level=0)
+                    #st.bar_chart(data_chart)
+                    df_sample = df.sample(n=5000, random_state=42)
+                    p = bivariate_analysis(selected_feature_1, selected_feature_2, df_sample)
+                    plt.legend(loc="upper right")
+                    st.pyplot()
+                
                 
 
 if __name__=='__main__':
