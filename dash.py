@@ -58,7 +58,7 @@ def plot_gauge(current_value, threshold):
     title = {"text": "Current Value / Threshold Value"},
     gauge = {'axis': {'range': [0, 1]},
              'bar': {'color': "green"},
-             'threshold': {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': threshold}
+             'threshold': {'line': {'color': "orange", 'width': 4}, 'thickness': 0.75, 'value': threshold}
             }))
     return fig
     
@@ -165,10 +165,10 @@ def display_boxplots(dataframe, selected_id):
 
 
 def process():
-    st.title("Loan Default Prediction")
+    #st.title("Loan Default Prediction")
     html_temp = """
     <div style="background-color:steelblue;padding:10px">
-    <h2 style="color:white;text-align:center;">loan payment risk prediction ML App </h2>
+    <h2 style="color:white;text-align:center;">Loan payment risk prediction </h2>
     </div>
     """
     st.markdown(html_temp, unsafe_allow_html=True)
@@ -193,11 +193,13 @@ def process():
             risk_color = "green"
 
         st.sidebar.markdown(f'<p style="color:{risk_color}">{risk_assessment}</p>', unsafe_allow_html=True)
-        st.sidebar.write("Probability: ", round(float(prob), 4))
+        st.sidebar.write("Updated Probability: ", round(float(prob), 4))
         st.sidebar.write("Best threshold: ", 0.3918)
-        st.subheader('Probability Gauge')
         gauge = plot_gauge(prob, 0.3918)
+        gauge.update_traces(gauge=dict(bar=dict(color=risk_color)))
         st.plotly_chart(gauge)
+
+
 
     if st.sidebar.checkbox("Client Data"):
         # Récupération des informations du client sélectionné
@@ -264,9 +266,11 @@ def process():
         st.sidebar.markdown(f'<p style="color:{risk_color}">{risk_assessment}</p>', unsafe_allow_html=True)
         st.sidebar.write("Updated Probability: ", round(float(prob), 4))
         st.sidebar.write("Best threshold: ", 0.3918)
-        #st.subheader('Updated Probability Gauge')
         gauge = plot_gauge(prob, 0.3918)
+        gauge.update_traces(gauge=dict(bar=dict(color=risk_color)))
         st.plotly_chart(gauge)
+
+
 
     if st.sidebar.checkbox("Bivariate Analysis"):
          
