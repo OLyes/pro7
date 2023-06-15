@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='predict.css') }}">
+</head>
+<body>
+    <h1>Prediction Result</h1>
+    <div id="prediction">
+        <h2>Prediction result for Client ID: {{ result.client_id }}</h2>
+        <p>Probability: {{ result.probability }}</p>
+        <p>Threshold Value: {{ result.threshold_value }}</p>
+        {% if result.probability is defined and result.probability > 0.3918 %}
+            <p>Loan Denied</p>
+        {% else %}
+            <p>Loan Accepted</p>
+        {% endif %}
+    </div>
+</body>
+</html>
+

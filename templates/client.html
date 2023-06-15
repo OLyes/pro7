@@ -1,0 +1,79 @@
+<!-- client.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Client Data</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='client.css') }}">
+</head>
+<body>
+    <h1>Client ID: {{ client_id }}</h1>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>ACTIVE_DAYS_CREDIT_ENDDATE_MIN</td>
+            <td>{{ value['ACTIVE_DAYS_CREDIT_ENDDATE_MIN'] }}</td>
+        </tr>
+        <tr>
+            <td>AMT_ANNUITY</td>
+            <td>{{ value['AMT_ANNUITY'] }}</td>
+        </tr>
+        <tr>
+            <td>BURO_AMT_CREDIT_MAX_OVERDUE_MEAN</td>
+            <td>{{ value['BURO_AMT_CREDIT_MAX_OVERDUE_MEAN'] }}</td>
+        </tr>
+        <tr>
+            <td>BURO_CREDIT_ACTIVE_Closed_MEAN</td>
+            <td>{{ value['BURO_CREDIT_ACTIVE_Closed_MEAN'] }}</td>
+        </tr>
+        <tr>
+            <td>CODE_GENDER</td>
+            <td>{{ value['CODE_GENDER'] }}</td>
+        </tr>
+        <tr>
+            <td>DAYS_BIRTH</td>
+            <td>{{ value['DAYS_BIRTH'] }}</td>
+        </tr>
+        <tr>
+            <td>DAYS_EMPLOYED</td>
+            <td>{{ value['DAYS_EMPLOYED'] }}</td>
+        </tr>
+        <tr>
+            <td>EXT_SOURCE_2</td>
+            <td>{{ value['EXT_SOURCE_2'] }}</td>
+        </tr>
+        <tr>
+            <td>EXT_SOURCE_3</td>
+            <td>{{ value['EXT_SOURCE_3'] }}</td>
+        </tr>
+        <tr>
+            <td>FLAG_OWN_CAR</td>
+            <td>{{ value['FLAG_OWN_CAR'] }}</td>
+        </tr>
+        <tr>
+            <td>NAME_EDUCATION_TYPE_Highereducation</td>
+            <td>{{ value['NAME_EDUCATION_TYPE_Highereducation'] }}</td>
+        </tr>
+        <tr>
+            <td>ORGANIZATION_TYPE_Selfemployed</td>
+            <td>{{ value['ORGANIZATION_TYPE_Selfemployed'] }}</td>
+        </tr>
+        <tr>
+            <td>PAYMENT_RATE</td>
+            <td>{{ value['PAYMENT_RATE'] }}</td>
+        </tr>
+        <tr>
+            <td>PREV_CODE_REJECT_REASON_XAP_MEAN</td>
+            <td>{{ value['PREV_CODE_REJECT_REASON_XAP_MEAN'] }}</td>
+        </tr>
+        <tr>
+            <td>PREV_NAME_CONTRACT_STATUS_Refused_MEAN</td>
+            <td>{{ value['PREV_NAME_CONTRACT_STATUS_Refused_MEAN'] }}</td>
+        </tr>
+    </table>
+</body>
+</html>
+

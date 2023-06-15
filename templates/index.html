@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Loan Prediction</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+    <div id="container">
+        <h1>API Loan Prediction</h1>
+        <p>LightGBM Model used for prediction</p>
+        <form>
+            <label for="client">Client ID Number :</label>
+            <input type="text" id="client" name="client">
+            <button type="button" onclick="predict()">Predict</button>
+        </form>
+        <div id="prediction-result" style="display: none;">
+            <p id="client-id"></p>
+            <p id="probability"></p>
+            <p id="loan-status"></p>
+            <a id="client-info-link" href="#" style="display: none;">Client Data</a>
+        </div>
+    </div>
+
+    <script>
+        function predict() {
+            var clientId = document.getElementById("client").value;
+
+            // Effectuer une requête AJAX vers l'endpoint de prédiction avec le numéro du client
+            fetch("/predict/" + clientId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        document.getElementById("client-id").textContent = "Client ID: " + data.client_id;
+                        document.getElementById("probability").textContent = "Probability: " + data.probability;
+                        document.getElementById("loan-status").textContent = "Loan Status: " + data.loan_status;
+                        document.getElementById("prediction-result").style.display = "block";
+                        document.getElementById("client-info-link").style.display = "block";
+                        document.getElementById("client-info-link").href = "/get_value/" + data.client_id;
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        }
+    </script>
+</body>
+</html>
