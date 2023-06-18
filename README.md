@@ -14,11 +14,11 @@ Dashboard Streamlit de scoring déployé sur serveurs Streamlit, visible sur le 
 https://olyes-pro7-dash-xpzdf7.streamlit.app/
 
 
-Permettant d'afficher certaines données concernant le client selectionné dans la liste :
+Permettant d'afficher certaines données concernant le client selectionné:
 
 Risque de défaut (%)
 Décision du modèle
 Données du client
 Graphe situant le client par rapport aux autres clients et aux clients similaires
 Importance globale et locale des paramètres dans la décision du modèle
-Possibilité d'edition des parametres les plus infuent sur la décision du modele en temps réel
+Possibilité d'edition des parametres les plus infuents sur la décision du modele en temps réel
