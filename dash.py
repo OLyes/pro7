@@ -30,9 +30,27 @@ X = df.drop(columns=['TARGET'])
 feature_names = X.columns
 
 # Pickle
-with open("models/classifier.pkl","rb") as pickle_in:
-    classifier = pickle.load(pickle_in)
+#with open("models/classifier.pkl","rb") as pickle_in:
+#    classifier = pickle.load(pickle_in)
 
+# URL de l'API
+api_url = 'http://lyess.pythonanywhere.com/load_classifier'
+
+# Effectuer une requête GET à l'API
+response = requests.get(api_url)
+
+if response.status_code == 200:
+    # Récupérer la représentation binaire du modèle
+    classifier_bytes = response.content
+
+    # Charger le modèle à partir de la représentation binaire
+    classifier = pickle.loads(classifier_bytes)
+    
+else:
+    # Gérer les erreurs de la requête
+    print('Erreur lors de la récupération du modèle depuis l\'API.')
+    
+    
 
 explainer = shap.TreeExplainer(classifier, X, feature_names=feature_names)
 shap.initjs()
@@ -89,12 +107,26 @@ def get_value_shap(index):
 #    result = {'prediction':prediction, 'probability' : probability}
 #    return  result
 
-def request_prediction(df_all, classifier):
-    df_all = np.array(df_all).reshape(1, -1)
-    prediction = classifier.predict(df_all)[0]
-    probability = classifier.predict_proba(df_all)[:, 1][0]
-    result = {'prediction': prediction, 'probability': probability}
-    return result
+def request_prediction(sk_id):
+    # URL de votre API Flask
+    url = f"http://lyess.pythonanywhere.com/predict/{sk_id}"
+    
+    # Faites une requête GET à l'URL
+    response = requests.get(url)
+    
+    # Vérifiez si la requête a réussi
+    if response.status_code == 200:
+        result = response.json()
+        return result
+    else:
+        raise Exception(f"Request failed with status {response.status_code}")
+
+# def request_prediction(df_all, classifier):
+#     df_all = np.array(df_all).reshape(1, -1)
+#     prediction = classifier.predict(df_all)[0]
+#     probability = classifier.predict_proba(df_all)[:, 1][0]
+#     result = {'prediction': prediction, 'probability': probability}
+#     return result
 
 
 def best_classification(probas, threshold, X):
@@ -181,8 +213,9 @@ def process():
     df_all_shap = get_value_shap(Customer)
 
     if st.sidebar.button("Predict"):
-        result = request_prediction(df_all, classifier)
-        score = result['prediction']
+        result = request_prediction(Customer)
+        #result = request_prediction(df_all, classifier)
+        #score = result['prediction']
         prob = result['probability']
         y_pred = best_classification(prob, 0.3918, df_all)
         if y_pred == 1:
@@ -252,8 +285,11 @@ def process():
         
         # Mettre à jour d'autres variables en fonction des curseurs
 
-        result = request_prediction(df_all, classifier)
-        score = result['prediction']
+        result = request_prediction(Customer)
+        df_alll = np.array(df_all).reshape(1, -1)
+        probability = classifier.predict_proba(df_alll)[:, 1][0]
+        result = {'probability': probability}
+        #score = result['prediction']
         prob = result['probability']
         y_pred = best_classification(prob, 0.3918, df_all)
         if y_pred == 1:

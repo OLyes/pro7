@@ -66,6 +66,15 @@ def predict(sk_id):
 
     return jsonify(result)
 
+@app.route('/load_classifier', methods=['GET'])
+def load_classifier():
+    with open('models/classifier.pkl', 'rb') as f:
+        classifier = pickle.load(f)
+        
+    classifier_bytes = pickle.dumps(classifier)  # Exporter le modèle en binaire
+
+    return classifier_bytes, 200, {'Content-Type': 'application/octet-stream'}
+
 
 if __name__ == '__main__':
     app.run()
