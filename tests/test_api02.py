@@ -1,6 +1,11 @@
 import pytest
 from flask import Flask
-from pro7.api import app
+import sys
+import os
+
+# Ajoutez le chemin du dossier parent au chemin de recherche des modules
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from api import app
 
 @pytest.fixture
 def client():
