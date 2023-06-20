@@ -92,26 +92,9 @@ def get_value_shap(index):
     value = X.loc[index]
     return value.values.tolist()
 
-  
-#def request_prediction(URI, df_all):
-    
-#    response = requests.post(URI, json=df_all)
-#    if response.status_code != 200:
-#        raise Exception(
-#            "Request failed with status {}, {}".format(response.status_code, response.text))
-#   response = json.loads(response.text)
-#    response = pd.DataFrame(response)
-    
-#    prediction = response['prediction'][0]
-#    probability = response['probability'][0]
-#    result = {'prediction':prediction, 'probability' : probability}
-#    return  result
-
 def request_prediction(sk_id):
-    # URL de votre API Flask
     url = f"http://lyess.pythonanywhere.com/predict/{sk_id}"
     
-    # Faites une requête GET à l'URL
     response = requests.get(url)
     
     # Vérifiez si la requête a réussi
@@ -289,7 +272,6 @@ def process():
         df_alll = np.array(df_all).reshape(1, -1)
         probability = classifier.predict_proba(df_alll)[:, 1][0]
         result = {'probability': probability}
-        #score = result['prediction']
         prob = result['probability']
         y_pred = best_classification(prob, 0.3918, df_all)
         if y_pred == 1:
